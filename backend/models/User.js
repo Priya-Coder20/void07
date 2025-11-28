@@ -1,63 +1,67 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
+const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    _id: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return this.id;
+        },
+    },
     name: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     email: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true,
+        validate: {
+            isEmail: true,
+        },
     },
     password: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     role: {
-        type: String,
-        enum: ['admin', 'staff', 'student'],
-        required: true,
+        type: DataTypes.ENUM('admin', 'staff', 'student'),
+        allowNull: false,
     },
-}, { discriminatorKey: 'role', timestamps: true });
-
-// Hash password before saving
-// Hash password before saving
-userSchema.pre('save', async function () {
-    if (!this.isModified('password')) return;
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    // Staff specific
+    designation: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    // Student specific
+    department: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    year: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+}, {
+    timestamps: true,
+    hooks: {
+        beforeSave: async (user) => {
+            if (user.changed('password')) {
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(user.password, salt);
+            }
+        },
+    },
 });
 
-// Match password
-userSchema.methods.matchPassword = async function (enteredPassword) {
+User.prototype.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const User = mongoose.model('User', userSchema);
-
-// Admin Discriminator
-const Admin = User.discriminator('admin', new mongoose.Schema({}));
-
-// Staff Discriminator
-const Staff = User.discriminator('staff', new mongoose.Schema({
-    designation: {
-        type: String,
-        required: true,
-    },
-}));
-
-// Student Discriminator
-const Student = User.discriminator('student', new mongoose.Schema({
-    department: {
-        type: String,
-        required: true,
-    },
-    year: {
-        type: String,
-        required: true,
-    },
-}));
-
-module.exports = { User, Admin, Staff, Student };
+module.exports = User;

@@ -1,9 +1,10 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
+const { connectDB, sequelize } = require('./config/db');
+require('./models'); // Import models to setup associations
 
 const app = express();
 
@@ -23,18 +24,23 @@ app.get('/', (req, res) => {
     res.json({ message: 'Campus Connect API is running' });
 });
 
-// Database Connection
+// Database Connection & Server Start
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI;
 
-mongoose
-    .connect(MONGO_URI)
-    .then(() => {
-        console.log('Connected to MongoDB');
-        app.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-        });
-    })
-    .catch((err) => {
-        console.error('MongoDB connection error:', err);
+const startServer = async () => {
+    await connectDB();
+
+    // Sync models
+    try {
+        await sequelize.sync({ alter: true });
+        console.log('Database & Tables synced!');
+    } catch (error) {
+        console.error('Error syncing database:', error);
+    }
+
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
     });
+};
+
+startServer();

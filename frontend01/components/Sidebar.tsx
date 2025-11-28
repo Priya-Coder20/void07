@@ -11,10 +11,7 @@ const Sidebar = () => {
 
     const adminLinks = [
         { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-        { name: 'Create Student', href: '/admin/create-student', icon: UserPlus },
-        { name: 'Create Staff', href: '/admin/create-staff', icon: UserPlus },
-        { name: 'Manage Users', href: '/admin/manage-users', icon: Users },
-        { name: 'Manage Bookings', href: '/admin/bookings', icon: CheckSquare },
+        { name: 'Users', href: '/admin/manage-users', icon: Users },
         { name: 'Announcements', href: '/admin/announcements', icon: BookOpen },
     ];
 
@@ -22,7 +19,7 @@ const Sidebar = () => {
         { name: 'Dashboard', href: '/staff/dashboard', icon: LayoutDashboard },
         { name: 'Schedule', href: '/staff/schedule', icon: Calendar },
         { name: 'Upload Materials', href: '/staff/upload-materials', icon: BookOpen },
-        { name: 'Manage Bookings', href: '/admin/bookings', icon: CheckSquare },
+        { name: 'Manage Bookings', href: '/staff/bookings', icon: CheckSquare },
     ];
 
     const studentLinks = [

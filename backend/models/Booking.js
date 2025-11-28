@@ -1,53 +1,62 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const resourceSchema = new mongoose.Schema({
+const Resource = sequelize.define('Resource', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    _id: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return this.id;
+        },
+    },
     name: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     type: {
-        type: String,
-        enum: ['library', 'lab', 'room'],
-        required: true,
+        type: DataTypes.ENUM('library', 'lab', 'room'),
+        allowNull: false,
     },
     status: {
-        type: String,
-        enum: ['available', 'maintenance'],
-        default: 'available',
+        type: DataTypes.ENUM('available', 'maintenance'),
+        defaultValue: 'available',
     },
 });
 
-const bookingSchema = new mongoose.Schema({
-    resource: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Resource',
-        required: true,
+const Booking = sequelize.define('Booking', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
     },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+    _id: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return this.id;
+        },
     },
     date: {
-        type: Date,
-        required: true,
+        type: DataTypes.DATEONLY,
+        allowNull: false,
     },
     startTime: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     endTime: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     status: {
-        type: String,
-        enum: ['pending', 'approved', 'rejected'],
-        default: 'pending',
+        type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+        defaultValue: 'pending',
     },
-}, { timestamps: true });
-
-const Resource = mongoose.model('Resource', resourceSchema);
-const Booking = mongoose.model('Booking', bookingSchema);
+}, {
+    timestamps: true,
+});
 
 module.exports = { Resource, Booking };

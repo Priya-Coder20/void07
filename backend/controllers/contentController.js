@@ -1,4 +1,4 @@
-const Content = require('../models/Content');
+const { Content, User } = require('../models');
 
 // @desc    Create new content (Schedule, Material, Announcement)
 // @route   POST /api/content
@@ -13,7 +13,7 @@ const createContent = async (req, res) => {
             type,
             fileUrl,
             targetAudience,
-            uploadedBy: req.user._id,
+            uploadedBy: req.user.id,
         });
 
         res.status(201).json(content);
@@ -34,7 +34,16 @@ const getContent = async (req, res) => {
             query.type = type;
         }
 
-        const content = await Content.find(query).populate('uploadedBy', 'name');
+        const content = await Content.findAll({
+            where: query,
+            include: [
+                {
+                    model: User,
+                    as: 'uploader',
+                    attributes: ['name'],
+                },
+            ],
+        });
         res.json(content);
     } catch (error) {
         console.error(error);

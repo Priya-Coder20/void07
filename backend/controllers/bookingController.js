@@ -1,11 +1,11 @@
-const { Resource, Booking } = require('../models/Booking');
+const { Resource, Booking, User } = require('../models');
 
 // @desc    Get all resources
 // @route   GET /api/bookings/resources
 // @access  Private
 const getResources = async (req, res) => {
     try {
-        const resources = await Resource.find({});
+        const resources = await Resource.findAll();
         res.json(resources);
     } catch (error) {
         console.error(error);
@@ -21,8 +21,8 @@ const createBooking = async (req, res) => {
 
     try {
         const booking = await Booking.create({
-            resource: resourceId,
-            user: req.user._id,
+            resourceId,
+            userId: req.user.id,
             date,
             startTime,
             endTime,
@@ -42,9 +42,20 @@ const getBookings = async (req, res) => {
     try {
         let bookings;
         if (req.user.role === 'student') {
-            bookings = await Booking.find({ user: req.user._id }).populate('resource').populate('user', 'name');
+            bookings = await Booking.findAll({
+                where: { userId: req.user.id },
+                include: [
+                    { model: Resource },
+                    { model: User, attributes: ['name'] },
+                ],
+            });
         } else {
-            bookings = await Booking.find({}).populate('resource').populate('user', 'name');
+            bookings = await Booking.findAll({
+                include: [
+                    { model: Resource },
+                    { model: User, attributes: ['name'] },
+                ],
+            });
         }
         res.json(bookings);
     } catch (error) {
@@ -60,7 +71,7 @@ const updateBookingStatus = async (req, res) => {
     const { status } = req.body;
 
     try {
-        const booking = await Booking.findById(req.params.id);
+        const booking = await Booking.findByPk(req.params.id);
 
         if (booking) {
             booking.status = status;

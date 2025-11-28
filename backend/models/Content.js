@@ -1,32 +1,38 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const contentSchema = new mongoose.Schema({
+const Content = sequelize.define('Content', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    _id: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return this.id;
+        },
+    },
     title: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     description: {
-        type: String,
+        type: DataTypes.TEXT,
     },
     type: {
-        type: String,
-        enum: ['schedule', 'material', 'announcement'],
-        required: true,
+        type: DataTypes.ENUM('schedule', 'material', 'announcement'),
+        allowNull: false,
     },
     fileUrl: {
-        type: String,
-    },
-    uploadedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+        type: DataTypes.STRING,
     },
     targetAudience: {
-        type: [String], // ['student', 'staff']
-        default: ['student'],
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        defaultValue: ['student'],
     },
-}, { timestamps: true });
-
-const Content = mongoose.model('Content', contentSchema);
+}, {
+    timestamps: true,
+});
 
 module.exports = Content;
