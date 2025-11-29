@@ -21,9 +21,10 @@ interface Booking {
         name: string;
         type: string;
     };
-    date: string;
-    startTime: string;
-    endTime: string;
+    requestDate: string;
+    duration: number;
+    period: string;
+    quantity: number;
     status: string;
 }
 
@@ -84,11 +85,12 @@ export default function BookResource() {
         setMessage('');
     };
 
-    const handleConfirmBooking = async (bookingData: { date: string; startTime: string; endTime: string }) => {
+    const handleConfirmBooking = async (bookingData: { duration?: number; quantity?: number }) => {
         try {
             const config = { headers: { Authorization: `Bearer ${user?.token}` } };
             await axios.post('http://localhost:5000/api/bookings', {
                 resourceId: selectedResource?._id,
+                resourceType: selectedResource?.type,
                 ...bookingData
             }, config);
             setMessage('Booking request sent successfully!');
@@ -122,10 +124,10 @@ export default function BookResource() {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-medium transition-colors ${isActive
-                                    ? tab.id === 'my-bookings'
-                                        ? 'bg-purple-600 text-white'
-                                        : 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? tab.id === 'my-bookings'
+                                    ? 'bg-purple-600 text-white'
+                                    : 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                         >
                             <Icon size={18} />
@@ -148,17 +150,17 @@ export default function BookResource() {
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="font-bold text-gray-800">{booking.Resource?.name}</h3>
                                         <span className={`text-xs px-2 py-1 rounded capitalize ${booking.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                booking.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                    'bg-yellow-100 text-yellow-700'
+                                            booking.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                'bg-yellow-100 text-yellow-700'
                                             }`}>
                                             {booking.status}
                                         </span>
                                     </div>
                                     <div className="text-sm text-gray-600 space-y-1">
-                                        <p className="flex items-center gap-2"><Calendar size={14} /> {booking.date}</p>
+                                        <p className="flex items-center gap-2"><Calendar size={14} /> Requested: {new Date(booking.requestDate).toLocaleDateString()}</p>
                                         <p className="flex items-center gap-2"><Box size={14} /> {booking.Resource?.type}</p>
-                                        <p className="text-xs text-gray-400 mt-2">
-                                            {booking.startTime} - {booking.endTime}
+                                        <p className="text-xs text-gray-500 mt-2">
+                                            Duration: {booking.duration} {booking.period} {booking.quantity > 1 ? `(Qty: ${booking.quantity})` : ''}
                                         </p>
                                     </div>
                                 </div>

@@ -1,34 +1,43 @@
 import { useState } from 'react';
-import { X, Calendar, Clock } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface Resource {
     _id: string;
     name: string;
     type: string;
     status: string;
+    details?: any;
 }
 
 interface BookingModalProps {
     isOpen: boolean;
     onClose: () => void;
     resource: Resource | null;
-    onConfirm: (bookingData: { date: string; startTime: string; endTime: string }) => void;
+    onConfirm: (bookingData: { duration?: number; quantity?: number }) => void;
 }
 
 const BookingModal = ({ isOpen, onClose, resource, onConfirm }: BookingModalProps) => {
-    const [date, setDate] = useState('');
-    const [startTime, setStartTime] = useState('');
-    const [endTime, setEndTime] = useState('');
+    const [duration, setDuration] = useState(1);
+    const [quantity, setQuantity] = useState(1);
+    const [error, setError] = useState('');
 
     if (!isOpen || !resource) return null;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onConfirm({ date, startTime, endTime });
-        // Reset form
-        setDate('');
-        setStartTime('');
-        setEndTime('');
+        setError('');
+
+        // Validation
+        if (resource.type === 'library' && duration > 20) {
+            setError('Max duration for books is 20 days');
+            return;
+        }
+        if (resource.type === 'lab' && resource.details && quantity > (resource.details.totalQuantity - resource.details.quantityBooked)) {
+            setError('Not enough quantity available');
+            return;
+        }
+
+        onConfirm({ duration, quantity });
     };
 
     return (
@@ -41,52 +50,70 @@ const BookingModal = ({ isOpen, onClose, resource, onConfirm }: BookingModalProp
                     <X size={24} />
                 </button>
 
-                <h2 className="text-xl font-bold mb-2 text-gray-800">Book Resource</h2>
-                <p className="text-gray-600 mb-6">Booking: <span className="font-semibold text-blue-600">{resource.name}</span></p>
+                <h2 className="text-xl font-bold mb-2 text-gray-800">Book {resource.name}</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    {resource.type === 'library' && (
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (Days)</label>
                             <input
-                                type="date"
-                                value={date}
-                                onChange={(e) => setDate(e.target.value)}
-                                className="w-full pl-10 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                                type="number"
+                                min="1"
+                                max="20"
+                                value={duration}
+                                onChange={(e) => setDuration(parseInt(e.target.value))}
+                                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                 required
                             />
+                            <p className="text-xs text-gray-500 mt-1">Max 20 days. Fine: ₹{resource.details?.finePerDay || 0}/day</p>
                         </div>
-                    </div>
+                    )}
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                            <div className="relative">
-                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    {resource.type === 'room' && (
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (Months)</label>
+                            <input
+                                type="number"
+                                min="1"
+                                value={duration}
+                                onChange={(e) => setDuration(parseInt(e.target.value))}
+                                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                                required
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Cost: ₹{resource.details?.costPerPeriod || 0}/{resource.details?.period || 'month'}</p>
+                        </div>
+                    )}
+
+                    {resource.type === 'lab' && (
+                        <>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
                                 <input
-                                    type="time"
-                                    value={startTime}
-                                    onChange={(e) => setStartTime(e.target.value)}
-                                    className="w-full pl-10 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                                    type="number"
+                                    min="1"
+                                    max={resource.details ? resource.details.totalQuantity - resource.details.quantityBooked : 1}
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(parseInt(e.target.value))}
+                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                     required
                                 />
                             </div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                            <div className="relative">
-                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Duration (Days)</label>
                                 <input
-                                    type="time"
-                                    value={endTime}
-                                    onChange={(e) => setEndTime(e.target.value)}
-                                    className="w-full pl-10 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                                    type="number"
+                                    min="1"
+                                    value={duration}
+                                    onChange={(e) => setDuration(parseInt(e.target.value))}
+                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                     required
                                 />
+                                <p className="text-xs text-gray-500 mt-1">Fine: ₹{resource.details?.finePerDay || 0}/day</p>
                             </div>
-                        </div>
-                    </div>
+                        </>
+                    )}
+
+                    {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
                     <button
                         type="submit"

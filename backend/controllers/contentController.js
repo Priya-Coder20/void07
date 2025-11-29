@@ -1,4 +1,4 @@
-const { Content, User } = require('../models');
+const Content = require('../models_mongo/Content');
 
 // @desc    Create new content (Schedule, Material, Announcement)
 // @route   POST /api/content
@@ -34,16 +34,7 @@ const getContent = async (req, res) => {
             query.type = type;
         }
 
-        const content = await Content.findAll({
-            where: query,
-            include: [
-                {
-                    model: User,
-                    as: 'uploader',
-                    attributes: ['name'],
-                },
-            ],
-        });
+        const content = await Content.find(query);
         res.json(content);
     } catch (error) {
         console.error(error);

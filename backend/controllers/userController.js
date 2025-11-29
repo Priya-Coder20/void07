@@ -1,4 +1,4 @@
-const { User } = require('../models');
+const { Student, Staff, Admin } = require('../models');
 
 // @desc    Create a student
 // @route   POST /api/users/student
@@ -7,12 +7,12 @@ const createStudent = async (req, res) => {
     const { name, email, password, department, year } = req.body;
 
     try {
-        const userExists = await User.findOne({ where: { email } });
+        const userExists = await Student.findOne({ where: { email } });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const student = await User.create({
+        const student = await Student.create({
             name,
             email,
             password,
@@ -44,12 +44,12 @@ const createAdmin = async (req, res) => {
     const { name, email, password, designation } = req.body;
 
     try {
-        const userExists = await User.findOne({ where: { email } });
+        const userExists = await Admin.findOne({ where: { email } });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const admin = await User.create({
+        const admin = await Admin.create({
             name,
             email,
             password,
@@ -80,12 +80,12 @@ const createStaff = async (req, res) => {
     const { name, email, password, designation } = req.body;
 
     try {
-        const userExists = await User.findOne({ where: { email } });
+        const userExists = await Staff.findOne({ where: { email } });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const staff = await User.create({
+        const staff = await Staff.create({
             name,
             email,
             password,
@@ -114,10 +114,12 @@ const createStaff = async (req, res) => {
 // @access  Private/Admin
 const getUsers = async (req, res) => {
     try {
-        const users = await User.findAll({
-            attributes: { exclude: ['password'] },
-        });
-        res.json(users);
+
+        const students = await Student.findAll({ attributes: { exclude: ['password'] } });
+        const staff = await Staff.findAll({ attributes: { exclude: ['password'] } });
+        const admins = await Admin.findAll({ attributes: { exclude: ['password'] } });
+
+        res.json([...admins, ...staff, ...students]);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -129,7 +131,10 @@ const getUsers = async (req, res) => {
 // @access  Private/Admin
 const deleteUser = async (req, res) => {
     try {
-        const user = await User.findByPk(req.params.id);
+
+        let user = await Student.findByPk(req.params.id);
+        if (!user) user = await Staff.findByPk(req.params.id);
+        if (!user) user = await Admin.findByPk(req.params.id);
 
         if (user) {
             await user.destroy();
@@ -150,8 +155,11 @@ const checkEmail = async (req, res) => {
     const { email } = req.body;
 
     try {
-        const userExists = await User.findOne({ where: { email } });
-        if (userExists) {
+        const student = await Student.findOne({ where: { email } });
+        const staff = await Staff.findOne({ where: { email } });
+        const admin = await Admin.findOne({ where: { email } });
+
+        if (student || staff || admin) {
             return res.json({ available: false, message: 'Email already in use' });
         }
         res.json({ available: true, message: 'Email is available' });

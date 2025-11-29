@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { Student, Staff, Admin } = require('../models');
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (id, role) => {
+    return jwt.sign({ id, role }, process.env.JWT_SECRET, {
         expiresIn: '30d',
     });
 };
@@ -14,7 +14,18 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await User.findOne({ where: { email } });
+        let user = await Admin.findOne({ where: { email } });
+        let role = 'admin';
+
+        if (!user) {
+            user = await Staff.findOne({ where: { email } });
+            role = 'staff';
+        }
+
+        if (!user) {
+            user = await Student.findOne({ where: { email } });
+            role = 'student';
+        }
 
         if (user && (await user.matchPassword(password))) {
             res.json({
@@ -22,7 +33,7 @@ const loginUser = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                token: generateToken(user.id),
+                token: generateToken(user.id, user.role),
             });
         } else {
             res.status(401).json({ message: 'Invalid email or password' });

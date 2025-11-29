@@ -37,6 +37,7 @@ export default function StaffBookings() {
     const [managedSubTab, setManagedSubTab] = useState<'booked' | 'available'>('booked');
     const [resources, setResources] = useState<Resource[]>([]);
     const [bookings, setBookings] = useState<Booking[]>([]);
+    const [pendingRequests, setPendingRequests] = useState<Booking[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,7 +74,16 @@ export default function StaffBookings() {
         try {
             const config = { headers: { Authorization: `Bearer ${user?.token}` } };
             const res = await axios.get('http://localhost:5000/api/bookings', config);
-            setBookings(res.data);
+            if (Array.isArray(res.data)) {
+                setBookings(res.data);
+                setPendingRequests([]);
+            } else if (res.data.activeBookings) {
+                setBookings(res.data.activeBookings);
+                setPendingRequests(res.data.pendingRequests || []);
+            } else {
+                setBookings([]);
+                setPendingRequests([]);
+            }
         } catch (error) {
             console.error(error);
         }
@@ -97,11 +107,12 @@ export default function StaffBookings() {
         setMessage('');
     };
 
-    const handleConfirmBooking = async (bookingData: { date: string; startTime: string; endTime: string }) => {
+    const handleConfirmBooking = async (bookingData: { duration?: number; quantity?: number }) => {
         try {
             const config = { headers: { Authorization: `Bearer ${user?.token}` } };
             await axios.post('http://localhost:5000/api/bookings', {
                 resourceId: selectedResource?._id,
+                resourceType: selectedResource?.type,
                 ...bookingData
             }, config);
             setMessage('Booking request sent successfully!');
@@ -126,7 +137,7 @@ export default function StaffBookings() {
         }
     };
 
-    const pendingBookings = bookings.filter(b => b.status === 'pending');
+    const pendingBookings = pendingRequests.length > 0 ? pendingRequests : bookings.filter(b => b.status === 'pending');
     const approvedBookings = bookings.filter(b => b.status === 'approved');
 
     // Filter resources for the "Available" sub-tab (showing all resources for now, could filter by status)
