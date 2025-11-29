@@ -19,7 +19,10 @@ export default function StudentDashboard() {
         upcomingClasses: 0,
         newAssignments: 0,
         eventsThisWeek: 0,
+        rewardPoints: 0,
     });
+
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -29,6 +32,8 @@ export default function StudentDashboard() {
                 setStats(res.data);
             } catch (error) {
                 console.error('Error fetching student stats:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -59,20 +64,36 @@ export default function StudentDashboard() {
     return (
         <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-6">Student Dashboard</h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-gray-500 text-sm font-medium">Upcoming Classes</h3>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{stats.upcomingClasses}</p>
+
+            {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="bg-white p-6 rounded-lg shadow animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+                        </div>
+                    ))}
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-gray-500 text-sm font-medium">New Assignments</h3>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{stats.newAssignments}</p>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-500 text-sm font-medium">Upcoming Classes</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">{stats.upcomingClasses}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-500 text-sm font-medium">New Assignments</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">{stats.newAssignments}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-500 text-sm font-medium">Events This Week</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">{stats.eventsThisWeek}</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-lg shadow text-white">
+                        <h3 className="text-white/90 text-sm font-medium">Reward Points</h3>
+                        <p className="text-3xl font-bold mt-2">{stats.rewardPoints || 0}</p>
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-gray-500 text-sm font-medium">Events This Week</h3>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{stats.eventsThisWeek}</p>
-                </div>
-            </div>
+            )}
 
             <div className="mt-8">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Announcements</h2>

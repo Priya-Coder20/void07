@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
-import { Trash2, Search, Plus, Filter } from 'lucide-react';
+import { Trash2, Search, Plus, Filter, Pencil } from 'lucide-react';
 import AddUserModal from '@/components/AddUserModal';
+import EditUserModal from '@/components/EditUserModal';
 
 interface User {
     _id: string;
@@ -25,6 +26,8 @@ export default function ManageUsers() {
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
     useEffect(() => {
         fetchUsers();
@@ -152,8 +155,8 @@ export default function ManageUsers() {
                                         <td className="px-6 py-4 whitespace-nowrap text-gray-500">{u.email}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                                                    u.role === 'staff' ? 'bg-blue-100 text-blue-800' :
-                                                        'bg-green-100 text-green-800'
+                                                u.role === 'staff' ? 'bg-blue-100 text-blue-800' :
+                                                    'bg-green-100 text-green-800'
                                                 }`}>
                                                 {u.role}
                                             </span>
@@ -164,6 +167,16 @@ export default function ManageUsers() {
                                             {u.role === 'admin' && '-'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button
+                                                onClick={() => {
+                                                    setUserToEdit(u);
+                                                    setIsEditModalOpen(true);
+                                                }}
+                                                className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors mr-2"
+                                                title="Edit User"
+                                            >
+                                                <Pencil size={18} />
+                                            </button>
                                             <button
                                                 onClick={() => deleteUser(u._id)}
                                                 className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
@@ -192,6 +205,17 @@ export default function ManageUsers() {
                 onUserAdded={() => {
                     fetchUsers();
                     setMessage('User added successfully');
+                    setTimeout(() => setMessage(''), 3000);
+                }}
+            />
+
+            <EditUserModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                userToEdit={userToEdit}
+                onUserUpdated={() => {
+                    fetchUsers();
+                    setMessage('User updated successfully');
                     setTimeout(() => setMessage(''), 3000);
                 }}
             />

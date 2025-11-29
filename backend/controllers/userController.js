@@ -117,9 +117,23 @@ const getUsers = async (req, res) => {
 
         const students = await Student.findAll({ attributes: { exclude: ['password'] } });
         const staff = await Staff.findAll({ attributes: { exclude: ['password'] } });
-        const admins = await Admin.findAll({ attributes: { exclude: ['password'] } });
+        let admins = await Admin.findAll({ attributes: { exclude: ['password'] } });
 
-        res.json([...admins, ...staff, ...students]);
+        // Exclude the requesting admin from the list
+        if (req.user && req.user.role === 'admin') {
+            admins = admins.filter(admin => admin.id !== req.user.id);
+        }
+
+        const formatUser = (u) => {
+            const user = u.toJSON();
+            return { ...user, _id: user.id };
+        };
+
+        res.json([
+            ...admins.map(formatUser),
+            ...staff.map(formatUser),
+            ...students.map(formatUser)
+        ]);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -169,4 +183,65 @@ const checkEmail = async (req, res) => {
     }
 };
 
-module.exports = { createStudent, createStaff, createAdmin, getUsers, deleteUser, checkEmail };
+// @desc    Update user details
+// @route   PUT /api/users/:id
+// @access  Private/Admin
+const updateUser = async (req, res) => {
+    const { id } = req.params;
+    const { name, email, role, department, year, designation } = req.body;
+
+    try {
+        let user = await Student.findByPk(id);
+        let userType = 'student';
+
+        if (!user) {
+            user = await Staff.findByPk(id);
+            userType = 'staff';
+        }
+        if (!user) {
+            user = await Admin.findByPk(id);
+            userType = 'admin';
+        }
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Prevent admin from modifying their own account
+        if (userType === 'admin' && req.user.id === user.id) {
+            return res.status(403).json({ message: 'Admins cannot modify their own account' });
+        }
+
+        // Update common fields
+        user.name = name || user.name;
+        user.email = email || user.email;
+
+        // Update role-specific fields
+        if (userType === 'student') {
+            user.department = department || user.department;
+            user.year = year || user.year;
+        } else if (userType === 'staff') {
+            user.designation = designation || user.designation;
+        } else if (userType === 'admin') {
+            user.designation = designation || user.designation;
+        }
+
+        await user.save();
+
+        res.json({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            department: user.department,
+            year: user.year,
+            designation: user.designation,
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { createStudent, createStaff, createAdmin, getUsers, deleteUser, checkEmail, updateUser };

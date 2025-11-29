@@ -271,8 +271,8 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
                                 value={formData.password}
                                 onChange={handleChange}
                                 className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black pr-10 ${formData.password && isPasswordValid ? 'border-green-500 focus:border-green-500 focus:ring-green-500' :
-                                        formData.password && !isPasswordValid ? 'border-red-500 focus:border-red-500 focus:ring-red-500' :
-                                            errors.password ? 'border-red-500' : ''
+                                    formData.password && !isPasswordValid ? 'border-red-500 focus:border-red-500 focus:ring-red-500' :
+                                        errors.password ? 'border-red-500' : ''
                                     }`}
                             />
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -322,8 +322,8 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black pr-10 ${formData.confirmPassword && formData.confirmPassword === formData.password ? 'border-green-500 focus:border-green-500 focus:ring-green-500' :
-                                        formData.confirmPassword && formData.confirmPassword !== formData.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' :
-                                            errors.confirmPassword ? 'border-red-500' : ''
+                                    formData.confirmPassword && formData.confirmPassword !== formData.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' :
+                                        errors.confirmPassword ? 'border-red-500' : ''
                                     }`}
                             />
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">

@@ -36,6 +36,10 @@ const Student = sequelize.define('Student', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    rewards: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+    },
 }, {
     timestamps: true,
     hooks: {

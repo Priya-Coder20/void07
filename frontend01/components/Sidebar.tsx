@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, UserPlus, Users, Calendar, BookOpen, LogOut, CheckSquare } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Users, Calendar, BookOpen, LogOut, CheckSquare, FileText } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const Sidebar = () => {
@@ -18,6 +18,7 @@ const Sidebar = () => {
     const staffLinks = [
         { name: 'Dashboard', href: '/staff/dashboard', icon: LayoutDashboard },
         { name: 'Schedule', href: '/staff/schedule', icon: Calendar },
+        { name: 'Assignments', href: '/staff/assignments', icon: FileText },
         { name: 'Upload Materials', href: '/staff/upload-materials', icon: BookOpen },
         { name: 'Manage Bookings', href: '/staff/bookings', icon: CheckSquare },
     ];
@@ -25,6 +26,7 @@ const Sidebar = () => {
     const studentLinks = [
         { name: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboard },
         { name: 'My Schedule', href: '/student/schedule', icon: Calendar },
+        { name: 'Assignments', href: '/student/assignments', icon: FileText },
         { name: 'Study Materials', href: '/student/materials', icon: BookOpen },
         { name: 'Book Resource', href: '/student/book-resource', icon: BookOpen },
     ];

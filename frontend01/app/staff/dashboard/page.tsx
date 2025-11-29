@@ -22,6 +22,7 @@ export default function StaffDashboard() {
         materialsUploaded: 0,
     });
     const [requests, setRequests] = useState<Request[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -40,6 +41,8 @@ export default function StaffDashboard() {
                 }
             } catch (error) {
                 console.error('Error fetching staff data:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -69,20 +72,32 @@ export default function StaffDashboard() {
     return (
         <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-6">Staff Dashboard</h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-gray-500 text-sm font-medium">My Classes</h3>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{stats.myClasses}</p>
+
+            {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-white p-6 rounded-lg shadow animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+                        </div>
+                    ))}
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-gray-500 text-sm font-medium">Pending Requests</h3>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{stats.pendingRequests}</p>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-500 text-sm font-medium">My Classes</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">{stats.myClasses}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-500 text-sm font-medium">Pending Requests</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">{stats.pendingRequests}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-gray-500 text-sm font-medium">Materials Uploaded</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">{stats.materialsUploaded}</p>
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-gray-500 text-sm font-medium">Materials Uploaded</h3>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{stats.materialsUploaded}</p>
-                </div>
-            </div>
+            )}
 
             <div className="mt-8">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Pending Requests</h2>

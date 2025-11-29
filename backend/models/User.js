@@ -48,6 +48,10 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    rewardPoints: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+    },
 }, {
     timestamps: true,
     hooks: {
