@@ -14,9 +14,20 @@ const contentSchema = new mongoose.Schema({
         enum: ['schedule', 'material', 'announcement'],
         required: true,
     },
+    eventType: {
+        type: String,
+        enum: ['lecture', 'quiz', 'test'],
+        default: 'lecture',
+    },
     uploadedBy: {
         type: String, // Storing email or ID of the staff/admin
         required: true,
+    },
+    fileUrl: {
+        type: String,
+    },
+    scheduledDate: {
+        type: Date,
     },
     link: {
         type: String,
